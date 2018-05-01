@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ControllerActivity">
+
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+    >
+
+
+        <ImageView
+            android:id="@+id/up"
+            android:layout_width="85dp"
+            android:layout_height="91dp"
+            android:layout_above="@+id/left"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:clickable="true"
+            app:srcCompat="@drawable/up" />
+
+        <ImageView
+            android:id="@+id/left"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_centerVertical="true"
+            android:layout_toLeftOf="@+id/up"
+            android:layout_toStartOf="@+id/up"
+            app:srcCompat="@drawable/left" />
+
+        <ImageView
+            android:id="@+id/down"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_below="@+id/left"
+            android:layout_centerHorizontal="true"
+            app:srcCompat="@drawable/down" />
+
+        <ImageView
+            android:id="@+id/right"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_centerVertical="true"
+            android:layout_toEndOf="@+id/up"
+            android:layout_toRightOf="@+id/up"
+            app:srcCompat="@drawable/right" />
+
+
+    </RelativeLayout>
+</android.support.constraint.ConstraintLayout>
