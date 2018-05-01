@@ -12,14 +12,14 @@
         android:layout_height="fill_parent"
     >
 
-
         <ImageView
             android:id="@+id/up"
-            android:layout_width="85dp"
-            android:layout_height="91dp"
+            android:layout_width="84dp"
+            android:layout_height="96dp"
             android:layout_above="@+id/left"
             android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true"
+            android:layout_marginTop="165dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:clickable="true"
             app:srcCompat="@drawable/up" />
