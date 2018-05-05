@@ -20,5 +20,13 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(startController);
             }
         });
+        Button openAccelController = (Button) findViewById(R.id.open_accel_controller);
+        openAccelController.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent startControllerA = new Intent(MainActivity.this,AccelerometerControl.class);
+                startActivity(startControllerA);
+            }
+        });
     }
 }

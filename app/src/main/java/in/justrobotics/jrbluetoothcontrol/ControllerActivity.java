@@ -30,6 +30,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.util.Log;
 import android.view.Menu;
+import android.widget.TextView;
 import android.widget.Toast;
 public class ControllerActivity extends AppCompatActivity {
 
@@ -40,6 +41,7 @@ public class ControllerActivity extends AppCompatActivity {
         setContentView(R.layout.activity_controller);
 
         BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
         if (mBluetoothAdapter == null) {
         // Device does not support Bluetooth
         }
@@ -49,19 +51,30 @@ public class ControllerActivity extends AppCompatActivity {
             startActivityForResult(enableBtIntent, 1);
         }
 
-        Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
         if (pairedDevices.size() > 0) {
             for (BluetoothDevice device : pairedDevices) {
                 BluetoothDevice mDevice = device;
+                String macAddress = mDevice.getAddress();
+                TextView BluetoothID =  (TextView) findViewById(R.id.BTID);
+                BluetoothID.setText(device.getAddress());
+
             }
         }
+
+ /*       BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
+        for (BluetoothDevice device: pairedDevices) {
+            TextView BluetoothID =  (TextView) findViewById(R.id.BTID);
+
+        }
+        */
 
 
         ImageView Up = (ImageView) findViewById(R.id.up);
         Up.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //what to do when up is clicked
+                //what to do when up iss clicked
             }
         });
         ImageView Left = (ImageView) findViewById(R.id.left);
