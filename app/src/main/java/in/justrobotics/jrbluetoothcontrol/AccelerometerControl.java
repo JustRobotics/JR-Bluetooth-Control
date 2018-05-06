@@ -32,8 +32,6 @@ public class AccelerometerControl extends AppCompatActivity implements SensorEve
         bk = (ProgressBar) findViewById(R.id.down_magnitude);
         rt = (ProgressBar) findViewById(R.id.right_magnitude);
         lt = (ProgressBar) findViewById(R.id.left_magnitude);
-
-
     }
 
     @Override
@@ -47,6 +45,8 @@ public class AccelerometerControl extends AppCompatActivity implements SensorEve
         float z=event.values[2]*16.67f;
         int percentX = (int) x;
         int percentY = (int) y;
+        fd.setIndeterminate(false);
+        fd.setIndeterminate(false);
         fd.setProgress(percentX);
         rt.setProgress(percentY);
 
