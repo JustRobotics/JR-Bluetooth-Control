@@ -24,7 +24,7 @@ public class AccelerometerControl extends AppCompatActivity implements SensorEve
         setContentView(R.layout.activity_accelerometer_control);
         SM = (SensorManager)getSystemService(SENSOR_SERVICE);
         mySensor = SM.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        SM.registerListener(this, mySensor, SensorManager.SENSOR_DELAY_NORMAL);
+        SM.registerListener(this, mySensor, SensorManager.SENSOR_DELAY_UI);
         xText = (TextView)findViewById(R.id.textView1);
         yText = (TextView)findViewById(R.id.textView2);
         zText = (TextView)findViewById(R.id.textView3);
@@ -44,11 +44,31 @@ public class AccelerometerControl extends AppCompatActivity implements SensorEve
         float y=event.values[1]*16.67f;
         float z=event.values[2]*16.67f;
         int percentX = (int) x;
+        if (percentX<0){
+            rt.setProgress(Math.abs(percentX));
+            lt.setProgress(0);
+        }
+        else if (percentX>0){
+            lt.setProgress(Math.abs(percentX));
+            rt.setProgress(0);
+        }
+        else{
+            lt.setProgress(0);
+            rt.setProgress(0);
+        }
         int percentY = (int) y;
-        fd.setIndeterminate(false);
-        fd.setIndeterminate(false);
-        fd.setProgress(percentX);
-        rt.setProgress(percentY);
+        if (percentY<0){
+            fd.setProgress(Math.abs(percentY));
+            bk.setProgress(0);
+        }
+        else if (percentY>0){
+            bk.setProgress(Math.abs(percentY));
+            fd.setProgress(0);
+        }
+        else{
+            fd.setProgress(0);
+            bk.setProgress(0);
+        }
 
     }
 
