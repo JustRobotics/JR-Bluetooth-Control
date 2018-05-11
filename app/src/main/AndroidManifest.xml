@@ -18,7 +18,8 @@
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>
         </activity>
-        <activity android:name=".ControllerActivity" />
+        <activity android:name=".ControllerActivity"
+            android:label="Standard Controller"/>
         <activity android:name=".SplashScreen">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -26,7 +27,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".AccelerometerControl"></activity>
+        <activity android:name=".AccelerometerControl"
+            android:label="Tilt Controller"></activity>
     </application>
 
 </manifest>

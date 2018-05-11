@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">JR Bluetooth Control</string>
+    <string name="about_accel">About tilt controller</string>
+    <string name="about_stdc">This is the standard arrow-key controller. You can simply move your robot my clicking the arrow keys.</string>
 </resources>

@@ -2,12 +2,12 @@ package in.justrobotics.jrbluetoothcontrol;
 
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.Editable;
 import android.text.InputType;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -75,6 +75,7 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(startControllerA);
             }
         });
+        /*
         Button contactUs = (Button) findViewById(R.id.send_email);
         contactUs.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -82,5 +83,22 @@ public class MainActivity extends AppCompatActivity {
                 sendEmail();
             }
         });
+    */
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main_menu,menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        switch(id){
+            case R.id.contact_us_sendemail:
+                sendEmail();
+        }
+        return true;
     }
 }

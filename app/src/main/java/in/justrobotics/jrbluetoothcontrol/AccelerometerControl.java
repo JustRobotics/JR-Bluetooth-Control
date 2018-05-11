@@ -1,5 +1,10 @@
 package in.justrobotics.jrbluetoothcontrol;
 
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
@@ -7,8 +12,13 @@ import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import java.util.Set;
+import java.util.UUID;
 
 
 public class AccelerometerControl extends AppCompatActivity implements SensorEventListener {
@@ -18,16 +28,51 @@ public class AccelerometerControl extends AppCompatActivity implements SensorEve
     private SensorManager SM;
     private ProgressBar fd,bk,rt,lt;
 
+    public void displayAboutTiltController(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("About the tilt controller");
+        builder.setMessage("This type of controller allows you to control your JR Bluetooth Robot by tilting your phone (it utilizes the in-built accelerometer) forward and backward, left and right. The more you tilt it forward/backward, the faster your robot goes. Similarly, the more you tilt left/right, the turning is harder.");
+                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+
+        builder.show();
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_accelerometer_control);
+        BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
+
+
+        if (mBluetoothAdapter == null) {
+            // Device does not support Bluetooth
+        }
+
+        if (!mBluetoothAdapter.isEnabled()) {
+            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableBtIntent, 1);
+        }
+
+        if (pairedDevices.size() > 0) {
+            for (BluetoothDevice device : pairedDevices) {
+                BluetoothDevice mDevice = device;
+                //String macAddress = mDevice.getAddress();
+                final UUID PORT_UUID = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
+                TextView BluetoothID =  (TextView) findViewById(R.id.BTID);
+                final String DEVICE_ADDRESS=device.getAddress();
+                BluetoothID.setText(DEVICE_ADDRESS);
+
+            }
+        }
         SM = (SensorManager)getSystemService(SENSOR_SERVICE);
         mySensor = SM.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         SM.registerListener(this, mySensor, SensorManager.SENSOR_DELAY_UI);
-        xText = (TextView)findViewById(R.id.textView1);
-        yText = (TextView)findViewById(R.id.textView2);
-        zText = (TextView)findViewById(R.id.textView3);
         fd = (ProgressBar) findViewById(R.id.up_magnitude);
         bk = (ProgressBar) findViewById(R.id.down_magnitude);
         rt = (ProgressBar) findViewById(R.id.right_magnitude);
@@ -37,9 +82,6 @@ public class AccelerometerControl extends AppCompatActivity implements SensorEve
     @Override
     public void onSensorChanged(SensorEvent event) {
         fd.setIndeterminate(false);
-        xText.setText("X: " + event.values[0]);
-        yText.setText("Y: " + event.values[1]);
-        zText.setText("Z: " + event.values[2]);
         float x=event.values[0]*16.67f;
         float y=event.values[1]*16.67f;
         float z=event.values[2]*16.67f;
@@ -76,5 +118,19 @@ public class AccelerometerControl extends AppCompatActivity implements SensorEve
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
 
     }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.accelerometerc_menu,menu);
+        return true;
+    }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        switch(id){
+            case R.id.howtouse_accel:
+                displayAboutTiltController();
+        }
+        return true;
+    }
 }
