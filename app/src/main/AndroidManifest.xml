@@ -19,7 +19,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".ControllerActivity"
-            android:label="Standard Controller"/>
+            android:label="Standard Controller"
+            android:screenOrientation="portrait"/>
         <activity android:name=".SplashScreen">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -28,7 +29,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".AccelerometerControl"
-            android:label="Tilt Controller"></activity>
+            android:label="Tilt Controller"
+            android:screenOrientation="portrait"/>
     </application>
 
 </manifest>
