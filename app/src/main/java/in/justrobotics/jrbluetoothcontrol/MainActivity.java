@@ -29,14 +29,9 @@ public class MainActivity extends AppCompatActivity {
     public void sendEmail () {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Send a message: ");
-        // Set up the input
         final EditText input = new EditText(this);
-        //Editable Message = input.getText();
-        //final String message = Message.toString();
-// Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
         input.setInputType(InputType.TYPE_CLASS_TEXT);
         builder.setView(input);
-// Set up the buttons
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
