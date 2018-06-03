@@ -323,9 +323,7 @@ public class ControllerActivity extends AppCompatActivity {
                 }
             }
         }
-SystemClock x;
-        AdapterView y;
-        InputStream z;
+
         /* Call this from the main activity to send data to the remote device */
         public void write(String input) {
             byte[] bytes = input.getBytes();           //converts entered String into bytes
