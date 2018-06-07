@@ -26,8 +26,6 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.UnknownHostException;
-import java.sql.Connection;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -51,7 +49,7 @@ import android.view.MotionEvent;
 
 public class ControllerActivity extends AppCompatActivity {
 
-    private BluetoothAdapter mBTAdapter;
+    private BluetoothAdapter mBTAdapter = BluetoothAdapter.getDefaultAdapter();
     private Set<BluetoothDevice> mPairedDevices;
     private ArrayAdapter<String> mBTArrayAdapter;
 
@@ -116,7 +114,7 @@ public class ControllerActivity extends AppCompatActivity {
             }
         };
 
-        if (mBTArrayAdapter == null) {
+        if (mBTAdapter == null) {
             // Device does not support Bluetooth
             Log.i(TAG, "onCreate: Status: Bluetooth not found");
             Toast.makeText(getApplicationContext(),"Bluetooth device not found!",Toast.LENGTH_SHORT).show();
@@ -128,6 +126,9 @@ public class ControllerActivity extends AppCompatActivity {
                 public void onClick(View v){
                     if(mConnectedThread != null) //First check to make sure thread created
                         mConnectedThread.write("1");
+                    else if (mConnectedThread==null)
+                        mConnectedThread.write("1");
+                        Toast.makeText(getApplicationContext(),"No connectedthread",Toast.LENGTH_SHORT).show();
                 }
             });
 
@@ -326,9 +327,8 @@ public class ControllerActivity extends AppCompatActivity {
 
         /* Call this from the main activity to send data to the remote device */
         public void write(String input) {
-            byte[] bytes = input.getBytes();           //converts entered String into bytes
             try {
-                mmOutStream.write(bytes);
+                mmOutStream.write(input.getBytes());
             } catch (IOException e) { }
         }
 
