@@ -204,6 +204,7 @@ public class ControllerActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_controller);
+        mBluetoothConnection = new BluetoothConnectionService(ControllerActivity.this);
 
         ImageView Up = (ImageView) findViewById(R.id.up);
         ImageView Down = (ImageView) findViewById(R.id.down);
