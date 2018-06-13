@@ -3,51 +3,23 @@ package in.justrobotics.jrbluetoothcontrol;
 import android.Manifest;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.content.pm.PackageManager;
 import android.os.Build;
-import android.os.Handler;
-import android.os.SystemClock;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ImageView;
-
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Method;
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 import java.util.UUID;
-
-import android.os.Bundle;
-import android.os.StrictMode;
-import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothSocket;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.util.Log;
 import android.view.Menu;
-import android.widget.TextView;
-import android.widget.Toast;
-import android.view.MotionEvent;
 
 public class ControllerActivity extends AppCompatActivity {
     private static final String TAG = "ControllerActivity";
@@ -170,6 +142,7 @@ public class ControllerActivity extends AppCompatActivity {
 
             if(action.equals(BluetoothDevice.ACTION_BOND_STATE_CHANGED)){
                 BluetoothDevice mDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                mBTDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 //3 cases:
                 //case1: bonded already
                 if (mDevice.getBondState() == BluetoothDevice.BOND_BONDED){
@@ -177,7 +150,7 @@ public class ControllerActivity extends AppCompatActivity {
                     //inside BroadcastReceiver4
                     mBTDevice = mDevice;
                 }
-                //case2: creating a bone
+                //case2: creating a bond
                 if (mDevice.getBondState() == BluetoothDevice.BOND_BONDING) {
                     Log.d(TAG, "BroadcastReceiver: BOND_BONDING.");
                 }
@@ -205,7 +178,7 @@ public class ControllerActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_controller);
         mBluetoothConnection = new BluetoothConnectionService(ControllerActivity.this);
-
+        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         ImageView Up = (ImageView) findViewById(R.id.up);
         ImageView Down = (ImageView) findViewById(R.id.down);
         ImageView Left = (ImageView) findViewById(R.id.left);
