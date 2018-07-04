@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
@@ -14,14 +15,15 @@ import android.os.Handler;
 import android.os.SystemClock;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -64,6 +66,8 @@ public class ControllerActivity extends AppCompatActivity {
     private final static int CONNECTING_STATUS = 3; // used in bluetooth handler to identify message status
 
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -76,6 +80,7 @@ public class ControllerActivity extends AppCompatActivity {
         commandFromReverse=0;
         commandFromLeft=0;
         commandFromRight=0;
+
 
 //        mBluetoothStatus = (TextView)findViewById(R.id.bluetoothStatus);
 //        mReadBuffer = (TextView) findViewById(R.id.readBuffer);
@@ -127,24 +132,18 @@ public class ControllerActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v){
                     commandFromForward=1;
-                    if(mConnectedThread != null) //First check to make sure thread created
-                        mConnectedThread.write(Integer.toString(commandFromForward));
                 }
             });
             Down.setOnClickListener(new View.OnClickListener(){
                 @Override
                 public void onClick(View v){
                     commandFromReverse=2;
-                    if(mConnectedThread != null) //First check to make sure thread created
-                        mConnectedThread.write(Integer.toString(commandFromReverse));
                 }
             });
             Left.setOnClickListener(new View.OnClickListener(){
                 @Override
                 public void onClick(View v){
                     commandFromLeft=4;
-                    if(mConnectedThread != null) //First check to make sure thread created
-                        mConnectedThread.write(Integer.toString(commandFromLeft));
                 }
             });
             Right.setOnClickListener(new View.OnClickListener(){
@@ -199,8 +198,65 @@ public class ControllerActivity extends AppCompatActivity {
             });
 */
         }
+        final Handler ha=new Handler();
+        ha.postDelayed(new Runnable() {
+
+            @Override
+            public void run() {
+                if (mConnectedThread != null) {
+                    sendCumulativeCommand(commandFromForward,commandFromReverse,commandFromLeft,commandFromRight);
+                }
+                ha.postDelayed(this, 5000);
+            }
+        }, 5000);
+
     }
 
+    public void toastMe(){
+        Toast.makeText(getApplicationContext(),"abcdefg",Toast.LENGTH_SHORT).show();
+/*        try {
+            synchronized (this) {
+                this.wait(1000);
+            }
+        }
+        catch (InterruptedException ie){
+            System.out.println("Interrupted");
+        }*/
+    }
+
+    public void sendCumulativeCommand(int fd, int bk, int rt, int lt){
+        int cumulativeCommand=fd+bk+rt+lt;
+        mConnectedThread.write(Integer.toString(cumulativeCommand));
+    }
+    @Override
+    public boolean onCreateOptionsMenu (Menu menu){
+
+        getMenuInflater().inflate(R.menu.stdc_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected (MenuItem item){
+        int id = item.getItemId();
+        switch (id) {
+            case R.id.howtouse_controller:
+                displayAboutStandardController();
+        }
+        return true;
+    }
+
+        public void displayAboutStandardController() {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("About the standard controller");
+            builder.setMessage(R.string.about_stdc);
+            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                }
+            });
+            builder.show();
+        }
     private void bluetoothOn(){
         if (!mBTAdapter.isEnabled()) {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);

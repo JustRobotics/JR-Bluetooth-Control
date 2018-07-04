@@ -31,7 +31,7 @@ public class AccelerometerControl extends AppCompatActivity implements SensorEve
     public void displayAboutTiltController(){
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("About the tilt controller");
-        builder.setMessage("This type of controller allows you to control your JR Bluetooth Robot by tilting your phone (it utilizes the in-built accelerometer) forward and backward, left and right. The more you tilt it forward/backward, the faster your robot goes. Similarly, the more you tilt left/right, the turning is harder.");
+        builder.setMessage(R.string.about_accelc);
                 builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
