@@ -16,6 +16,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -37,18 +38,18 @@ import java.util.UUID;
 public class ControllerActivity extends AppCompatActivity {
 
     // GUI Components
-    private TextView mBluetoothStatus;
-    private TextView mReadBuffer;
-    private Button mScanBtn;
-    private Button mOffBtn;
-    private Button mListPairedDevicesBtn;
-    private Button mDiscoverBtn;
+//    private TextView mBluetoothStatus;
+//    private TextView mReadBuffer;
+//    private Button mScanBtn;
+//    private Button mOffBtn;
+//    private Button mListPairedDevicesBtn;
+//    private Button mDiscoverBtn;
     private BluetoothAdapter mBTAdapter;
     private Set<BluetoothDevice> mPairedDevices;
     private ArrayAdapter<String> mBTArrayAdapter;
     private ListView mDevicesListView;
-    private ImageView Up;
-
+    private ImageView Up,Down,Left,Right;
+    private int commandFromForward,commandFromReverse,commandFromLeft,commandFromRight;
     private final String TAG = MainActivity.class.getSimpleName();
     private Handler mHandler; // Our main handler that will receive callback notifications
     private ConnectedThread mConnectedThread; // bluetooth background worker thread to send and receive data
@@ -68,6 +69,13 @@ public class ControllerActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_controller);
         Up = (ImageView) findViewById(R.id.upfwd);
+        Down = (ImageView) findViewById(R.id.downbk);
+        Left = (ImageView) findViewById(R.id.leftlt);
+        Right = (ImageView) findViewById(R.id.rightrt);
+        commandFromForward=0;
+        commandFromReverse=0;
+        commandFromLeft=0;
+        commandFromRight=0;
 
 //        mBluetoothStatus = (TextView)findViewById(R.id.bluetoothStatus);
 //        mReadBuffer = (TextView) findViewById(R.id.readBuffer);
@@ -118,10 +126,47 @@ public class ControllerActivity extends AppCompatActivity {
             Up.setOnClickListener(new View.OnClickListener(){
                 @Override
                 public void onClick(View v){
+                    commandFromForward=1;
                     if(mConnectedThread != null) //First check to make sure thread created
-                        mConnectedThread.write("1");
+                        mConnectedThread.write(Integer.toString(commandFromForward));
                 }
             });
+            Down.setOnClickListener(new View.OnClickListener(){
+                @Override
+                public void onClick(View v){
+                    commandFromReverse=2;
+                    if(mConnectedThread != null) //First check to make sure thread created
+                        mConnectedThread.write(Integer.toString(commandFromReverse));
+                }
+            });
+            Left.setOnClickListener(new View.OnClickListener(){
+                @Override
+                public void onClick(View v){
+                    commandFromLeft=4;
+                    if(mConnectedThread != null) //First check to make sure thread created
+                        mConnectedThread.write(Integer.toString(commandFromLeft));
+                }
+            });
+            Right.setOnClickListener(new View.OnClickListener(){
+                @Override
+                public void onClick(View v){
+                    commandFromRight=8;
+                    if(mConnectedThread != null) //First check to make sure thread created
+                        mConnectedThread.write(Integer.toString(commandFromRight));
+                }
+            });
+/*                Up.setOnTouchListener(new View.OnTouchListener() {
+                    @Override
+                    public boolean onTouch(View v, MotionEvent event) {
+                        if (event.getAction()==MotionEvent.ACTION_DOWN){
+
+                        }
+                        if (event.getAction()==MotionEvent.ACTION_UP){
+
+                        }
+                        return false;
+                    }
+                });*/
 
 
 /*
