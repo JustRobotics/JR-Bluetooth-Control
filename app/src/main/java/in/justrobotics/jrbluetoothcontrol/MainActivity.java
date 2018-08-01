@@ -70,6 +70,14 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(startControllerA);
             }
         });
+        Button openTerminal = (Button) findViewById(R.id.start_terminal);
+        openTerminal.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent startTerminal = new Intent(MainActivity.this,TerminalActivity.class);
+                startActivity(startTerminal);
+            }
+        });
         /*
         Button contactUs = (Button) findViewById(R.id.send_email);
         contactUs.setOnClickListener(new View.OnClickListener() {

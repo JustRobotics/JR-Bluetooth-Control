@@ -3,6 +3,9 @@ package in.justrobotics.jrbluetoothcontrol;
 import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothGatt;
+import android.bluetooth.BluetoothManager;
+import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothSocket;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -34,6 +37,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -64,8 +68,8 @@ public class ControllerActivity extends AppCompatActivity {
     private final static int REQUEST_ENABLE_BT = 1; // used to identify adding bluetooth names
     private final static int MESSAGE_READ = 2; // used in bluetooth handler to identify message update
     private final static int CONNECTING_STATUS = 3; // used in bluetooth handler to identify message status
-
-
+    public String rBTaddress;
+    public String rBTname;
 
 
     @Override
@@ -84,6 +88,7 @@ public class ControllerActivity extends AppCompatActivity {
 //        mDevicesListView = (ListView)findViewById(R.id.devicesListView);
 //        mDevicesListView.setAdapter(mBTArrayAdapter); // assign model to view
 //        mDevicesListView.setOnItemClickListener(mDeviceClickListener);
+        mBTArrayAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1);
 
         // Ask for location permission if not already allowed
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
@@ -143,8 +148,48 @@ public class ControllerActivity extends AppCompatActivity {
                         mConnectedThread.write(Integer.toString(commandFromRight));
                 }
             });*/
-            mConnectedThread = new ConnectedThread(mBTSocket);
-            mConnectedThread.start();
+
+            checkConnected();
+            BluetoothManager manager = (BluetoothManager) getSystemService(BLUETOOTH_SERVICE);
+            List<BluetoothDevice> connected = manager.getConnectedDevices(BluetoothGatt.GATT);
+            Log.i("Connected Devices: ", connected.toString()+"");
+            new Thread()
+            {
+                public void run() {
+                    boolean fail = false;
+
+                    BluetoothDevice mdevice = mBTAdapter.getRemoteDevice(rBTaddress);
+
+                    try {
+                        mBTSocket = createBluetoothSocket(mdevice);
+                    } catch (IOException e) {
+                        fail = true;
+                        Toast.makeText(getBaseContext(), "Socket creation failed", Toast.LENGTH_SHORT).show();
+                    }
+                    // Establish the Bluetooth socket connection.
+                    try {
+                        mBTSocket.connect();
+                    } catch (IOException e) {
+                        try {
+                            fail = true;
+                            mBTSocket.close();
+                            mHandler.obtainMessage(CONNECTING_STATUS, -1, -1)
+                                    .sendToTarget();
+                        } catch (IOException e2) {
+                            //insert code to deal with this
+                            Toast.makeText(getBaseContext(), "Socket creation failed", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                    if(fail == false) {
+                        mConnectedThread = new ConnectedThread(mBTSocket);
+                        mConnectedThread.start();
+
+                        mHandler.obtainMessage(CONNECTING_STATUS, 1, -1, rBTname)
+                                .sendToTarget();
+                    }
+                }
+            }.start();
+
             Up.setOnTouchListener(new View.OnTouchListener() {
                     @Override
                     public boolean onTouch(View v, MotionEvent event) {
@@ -278,6 +323,45 @@ public class ControllerActivity extends AppCompatActivity {
         return true;
     }
 
+    public void checkConnected()
+    {
+        // true == headset connected && connected headset is support hands free
+        int state = BluetoothAdapter.getDefaultAdapter().getProfileConnectionState(BluetoothProfile.HEADSET);
+        if (state != BluetoothProfile.STATE_CONNECTED)
+            return;
+
+        try
+        {
+            BluetoothAdapter.getDefaultAdapter().getProfileProxy(getApplicationContext(), serviceListener, BluetoothProfile.HEADSET);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+    private BluetoothProfile.ServiceListener serviceListener = new BluetoothProfile.ServiceListener()
+    {
+        @Override
+        public void onServiceDisconnected(int profile)
+        {
+
+        }
+
+        @Override
+        public void onServiceConnected(int profile, BluetoothProfile proxy)
+        {
+            for (BluetoothDevice device : proxy.getConnectedDevices())
+            {
+                rBTaddress=device.getAddress();
+                rBTname=device.getName();
+                Log.i("onServiceConnected", "|" + device.getName() + " | " + device.getAddress() + " | " + proxy.getConnectionState(device) + "(connected = "
+                        + BluetoothProfile.STATE_CONNECTED + ")");
+            }
+
+            BluetoothAdapter.getDefaultAdapter().closeProfileProxy(profile, proxy);
+        }
+    };
+
     @Override
     public boolean onOptionsItemSelected (MenuItem item){
         int id = item.getItemId();
@@ -400,10 +484,10 @@ public class ControllerActivity extends AppCompatActivity {
                 public void run() {
                     boolean fail = false;
 
-                    BluetoothDevice device = mBTAdapter.getRemoteDevice(address);
+                    BluetoothDevice mdevice = mBTAdapter.getRemoteDevice(address);
 
                     try {
-                        mBTSocket = createBluetoothSocket(device);
+                        mBTSocket = createBluetoothSocket(mdevice);
                     } catch (IOException e) {
                         fail = true;
                         Toast.makeText(getBaseContext(), "Socket creation failed", Toast.LENGTH_SHORT).show();
