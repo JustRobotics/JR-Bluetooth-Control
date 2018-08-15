@@ -1,5 +1,6 @@
 package in.justrobotics.jrbluetoothcontrol;
 
+import in.justrobotics.jrbluetoothcontrol.MainActivity;
 import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -42,7 +43,6 @@ import java.util.Set;
 import java.util.UUID;
 
 public class ControllerActivity extends AppCompatActivity {
-
     // GUI Components
 //    private TextView mBluetoothStatus;
 //    private TextView mReadBuffer;
