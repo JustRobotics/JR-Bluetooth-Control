@@ -9,6 +9,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Handler;
+import android.os.Message;
 import android.os.SystemClock;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -30,6 +31,7 @@ import android.widget.Toast;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.util.Set;
 import java.util.UUID;
@@ -95,11 +97,50 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mBTArrayAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1);
+        mBTAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (mBTAdapter.isEnabled()){
+            listPairedDevices();
+            AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivity.this);
+            LayoutInflater inflater = getLayoutInflater();
+            View convertView = (View) inflater.inflate(R.layout.dialog_btdevices, null);
+            alertDialog.setView(convertView);
+            alertDialog.setTitle("Select your device");
+            alertDialog.setMessage("A JR Bluetooth device name is of the form JR_X");
+            ListView devicesListView = (ListView) convertView.findViewById(R.id.mDevicesListView);
+            devicesListView.setAdapter(mBTArrayAdapter);
+            devicesListView.setOnItemClickListener(mDeviceClickListener);
+            alertDialog.show();
+        }
+
+
+        mHandler = new Handler(){
+            public void handleMessage(android.os.Message msg){
+                if(msg.what == MESSAGE_READ){
+                    String readMessage = null;
+                    try {
+                        readMessage = new String((byte[]) msg.obj, "UTF-8");
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    }
+                    //mReadBuffer.setText(readMessage);
+                }
+
+                if(msg.what == CONNECTING_STATUS){
+                    if(msg.arg1 == 1) {
+//                        mBluetoothStatus.setText("Connected to Device: " + (String)(msg.obj));
+                    }
+                    else {
+//                        mBluetoothStatus.setText("Connection Failed");
+                    }
+                }
+            }
+        };
         Button openController = (Button) findViewById(R.id.open_controller);
         openController.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent startController = new Intent(MainActivity.this,ControllerActivity.class);
+                //startController.putExtra("test",1)
                 startActivity(startController);
             }
         });
@@ -119,15 +160,7 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(startTerminal);
             }
         });
-        AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivity.this);
-        LayoutInflater inflater = getLayoutInflater();
-        View convertView = (View) inflater.inflate(R.layout.dialog_btdevices, null);
-        alertDialog.setView(convertView);
-        alertDialog.setTitle("Select your device");
-        alertDialog.setMessage("A JR Bluetooth device name is of the form JR_X");
-        ListView devicesListView = (ListView) convertView.findViewById(R.id.mDevicesListView);
-        devicesListView.setAdapter(mBTArrayAdapter);
-        alertDialog.show();
+
     }
 
 
@@ -151,9 +184,17 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == REQUEST_ENABLE_BT) {
             // Make sure the request was successful
             if (resultCode == RESULT_OK) {
-                // The user picked a contact.
-                // The Intent's data Uri identifies which contact was selected.
-                //mBluetoothStatus.setText("Enabled");
+                listPairedDevices();
+                AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivity.this);
+                LayoutInflater inflater = getLayoutInflater();
+                View convertView = (View) inflater.inflate(R.layout.dialog_btdevices, null);
+                alertDialog.setView(convertView);
+                alertDialog.setTitle("Select your device");
+                alertDialog.setMessage("A JR Bluetooth device name is of the form JR_X");
+                ListView devicesListView = (ListView) convertView.findViewById(R.id.mDevicesListView);
+                devicesListView.setAdapter(mBTArrayAdapter);
+                devicesListView.setOnItemClickListener(mDeviceClickListener);
+                alertDialog.show();
             }
             else {
                 //mBluetoothStatus.setText("Disabled");
@@ -203,7 +244,6 @@ public class MainActivity extends AppCompatActivity {
     private void listPairedDevices(){
         mPairedDevices = mBTAdapter.getBondedDevices();
         if(mBTAdapter.isEnabled()) {
-            // put it's one to the adapter
             for (BluetoothDevice device : mPairedDevices)
                 mBTArrayAdapter.add(device.getName() + "\n" + device.getAddress());
 
@@ -251,16 +291,17 @@ public class MainActivity extends AppCompatActivity {
                             mHandler.obtainMessage(CONNECTING_STATUS, -1, -1)
                                     .sendToTarget();
                         } catch (IOException e2) {
-                            //insert code to deal with this
                             Toast.makeText(getBaseContext(), "Socket creation failed", Toast.LENGTH_SHORT).show();
                         }
                     }
                     if(fail == false) {
                         mConnectedThread = new ConnectedThread(mBTSocket);
                         mConnectedThread.start();
+                        if (Message.obtain(mHandler) != null) {
+                            mHandler.obtainMessage(CONNECTING_STATUS, 1, -1, name)
+                                    .sendToTarget();
+                        }
 
-                        mHandler.obtainMessage(CONNECTING_STATUS, 1, -1, name)
-                                .sendToTarget();
                     }
                 }
             }.start();
@@ -272,7 +313,7 @@ public class MainActivity extends AppCompatActivity {
             final Method m = device.getClass().getMethod("createInsecureRfcommSocketToServiceRecord", UUID.class);
             return (BluetoothSocket) m.invoke(device, BTMODULEUUID);
         } catch (Exception e) {
-            Log.e(TAG, "Could not create Insecure RFComm Connection",e);
+            Log.e(TAG, "Could not create Insecure RFComm Connection ",e);
         }
         return  device.createRfcommSocketToServiceRecord(BTMODULEUUID);
     }
