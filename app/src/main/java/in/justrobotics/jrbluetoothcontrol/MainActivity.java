@@ -9,6 +9,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Handler;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.os.SystemClock;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -37,7 +39,6 @@ import java.util.Set;
 import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
-
     private BluetoothAdapter mBTAdapter;
     private Set<BluetoothDevice> mPairedDevices;
     private ArrayAdapter<String> mBTArrayAdapter;
@@ -106,7 +107,7 @@ public class MainActivity extends AppCompatActivity {
                 Intent startController = new Intent(MainActivity.this,ControllerActivity.class);
                 startController.putExtra("REMOTE_DEVICE_ADDRESS",address);
                 startController.putExtra("REMOTE_DEVICE_NAME",name);
-                startController.putExtra("BLUETOOTH_CONNECTED_THREAD",mConnectedThread);
+                //startController.putExtra("BLUETOOTH_CONNECTED_THREAD",mConnectedThread);
                 startActivity(startController);
             }
         });
@@ -317,7 +318,14 @@ public class MainActivity extends AppCompatActivity {
         return  device.createRfcommSocketToServiceRecord(BTMODULEUUID);
     }
 
-    private class ConnectedThread extends Thread implements Serializable {
+    public class xTest{
+        int a,b,c;
+    }
+    public class y extends xTest{
+        int d,e,f;
+    }
+
+    private class ConnectedThread extends Thread {
         private final BluetoothSocket mmSocket;
         private final InputStream mmInStream;
         private final OutputStream mmOutStream;
@@ -377,6 +385,9 @@ public class MainActivity extends AppCompatActivity {
             } catch (IOException e) { }
         }
     }
+
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

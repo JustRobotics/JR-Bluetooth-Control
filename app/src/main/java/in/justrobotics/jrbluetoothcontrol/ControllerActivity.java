@@ -39,7 +39,7 @@ import java.util.UUID;
 
 public class ControllerActivity extends AppCompatActivity {
 
-    private BluetoothAdapter mBTAdapter;
+    BluetoothAdapter mBTAdapter;
     private Set<BluetoothDevice> mPairedDevices;
     private ArrayAdapter<String> mBTArrayAdapter;
     private ListView mDevicesListView;
@@ -71,10 +71,11 @@ public class ControllerActivity extends AppCompatActivity {
         commandFromReverse=0;
         commandFromLeft=0;
         commandFromRight=0;
-        mBTArrayAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1);
         rBTaddress = getIntent().getStringExtra("REMOTE_DEVICE_ADDRESS");
+        Toast.makeText(getApplicationContext(),rBTaddress,Toast.LENGTH_SHORT).show();
         rBTname = getIntent().getStringExtra("REMOTE_DEVICE_NAME");
-        mConnectedThread = (ConnectedThread) getIntent().getSerializableExtra("BLUETOOTH_CONNECTED_THREAD");
+        Toast.makeText(getApplicationContext(),rBTname,Toast.LENGTH_SHORT).show();
+        //mConnectedThread = (ConnectedThread) getIntent().getSerializableExtra("BLUETOOTH_CONNECTED_THREAD");
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
 
@@ -97,104 +98,65 @@ public class ControllerActivity extends AppCompatActivity {
             }
         };
 
-        startmConnectedThread();
-        if (mBTArrayAdapter == null) {
-            Toast.makeText(getApplicationContext(),"Bluetooth device not found!",Toast.LENGTH_SHORT).show();
-        }
-        else {
-            new Thread()
-            {
-                public void run() {
-                    boolean fail = false;
+        startConnectedThread();
 
-                    BluetoothDevice mdevice = mBTAdapter.getRemoteDevice(rBTaddress);
-
-                    try {
-                        mBTSocket = createBluetoothSocket(mdevice);
-                    } catch (IOException e) {
-                        fail = true;
-                        Toast.makeText(getBaseContext(), "Socket creation failed", Toast.LENGTH_SHORT).show();
-                    }
-                    // Establish the Bluetooth socket connection.
-                    try {
-                        mBTSocket.connect();
-                    } catch (IOException e) {
-                        try {
-                            fail = true;
-                            mBTSocket.close();
-                            mHandler.obtainMessage(CONNECTING_STATUS, -1, -1)
-                                    .sendToTarget();
-                        } catch (IOException e2) {
-                            //insert code to deal with this
-                            Toast.makeText(getBaseContext(), "Socket creation failed", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                    if(fail == false) {
-                        mConnectedThread = new ConnectedThread(mBTSocket);
-                        mConnectedThread.start();
-
-                        mHandler.obtainMessage(CONNECTING_STATUS, 1, -1, rBTname)
-                                .sendToTarget();
-                    }
-                }
-            }.start();
-
-            Up.setOnTouchListener(new View.OnTouchListener() {
-                    @Override
-                    public boolean onTouch(View v, MotionEvent event) {
-                        if (event.getAction()==MotionEvent.ACTION_DOWN){
-                            commandFromForward=1;
-                        }
-                        if (event.getAction()==MotionEvent.ACTION_UP){
-                            commandFromForward=0;
-                        }
-                        return false;
-                    }
-                });
-            Down.setOnTouchListener(new View.OnTouchListener() {
+        Up.setOnTouchListener(new View.OnTouchListener() {
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
                     if (event.getAction()==MotionEvent.ACTION_DOWN){
-                        commandFromReverse=2;
+                        commandFromForward=1;
                     }
                     if (event.getAction()==MotionEvent.ACTION_UP){
-                        commandFromReverse=0;
+                        commandFromForward=0;
                     }
                     return false;
                 }
             });
-            Left.setOnTouchListener(new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    if (event.getAction()==MotionEvent.ACTION_DOWN){
-                        commandFromLeft=4;
-                    }
-                    if (event.getAction()==MotionEvent.ACTION_UP){
-                        commandFromLeft=0;
-                    }
-                    return false;
+        Down.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction()==MotionEvent.ACTION_DOWN){
+                    commandFromReverse=2;
                 }
-            });
-            Right.setOnTouchListener(new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    if (event.getAction()==MotionEvent.ACTION_DOWN){
-                        commandFromRight=8;
-                    }
-                    if (event.getAction()==MotionEvent.ACTION_UP){
-                        commandFromRight=0;
-                    }
-                    return false;
+                if (event.getAction()==MotionEvent.ACTION_UP){
+                    commandFromReverse=0;
                 }
-            });
-
-            if (mConnectedThread != null) {
-                mConnectedThread.write("stdc_init");
+                return false;
             }
-            else if (mConnectedThread==null) {
-                toastMe("It seems your bluetooth module is disconnected. Please connect it and restart.","long");
+        });
+        Left.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction()==MotionEvent.ACTION_DOWN){
+                    commandFromLeft=4;
+                }
+                if (event.getAction()==MotionEvent.ACTION_UP){
+                    commandFromLeft=0;
+                }
+                return false;
             }
+        });
+        Right.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction()==MotionEvent.ACTION_DOWN){
+                    commandFromRight=8;
+                }
+                if (event.getAction()==MotionEvent.ACTION_UP){
+                    commandFromRight=0;
+                }
+                return false;
+            }
+        });
+
+        if (mConnectedThread != null) {
+            mConnectedThread.write("stdc_init");
+            toastMe("Start","short");
         }
+        else if (mConnectedThread==null) {
+            toastMe("It seems your bluetooth module is disconnected. Please connect it and restart.","long");
+        }
+
         final Handler ha=new Handler();
         ha.postDelayed(new Runnable() {
 
@@ -251,18 +213,19 @@ public class ControllerActivity extends AppCompatActivity {
         return true;
     }
 
-        public void displayAboutStandardController() {
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setTitle("About the standard controller");
-            builder.setMessage(R.string.about_stdc);
-            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                }
-            });
-            builder.show();
-        }
+    public void displayAboutStandardController() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("About the standard controller");
+        builder.setMessage(R.string.about_stdc);
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        builder.show();
+    }
+
     private void bluetoothOn(){
         if (!mBTAdapter.isEnabled()) {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
@@ -344,17 +307,11 @@ public class ControllerActivity extends AppCompatActivity {
     }
 
 
-    public void startmConnectedThread(){
+    public void startConnectedThread(){
         if(!mBTAdapter.isEnabled()) {
             Toast.makeText(getBaseContext(), "Bluetooth not on", Toast.LENGTH_SHORT).show();
             return;
         }
-
-        //mBluetoothStatus.setText("Connecting...");
-        // Get the device MAC address, which is the last 17 chars in the View
-//        String info = ((TextView) v).getText().toString();
-//        address = info.substring(info.length() - 17);
-//        name = info.substring(0,info.length() - 17);
 
         // Spawn a new thread to avoid blocking the GUI one
         new Thread()
@@ -376,15 +333,17 @@ public class ControllerActivity extends AppCompatActivity {
                 } catch (IOException e) {
                     try {
                         fail = true;
+//                        toastMe("fail e","short");
                         mBTSocket.close();
                         mHandler.obtainMessage(CONNECTING_STATUS, -1, -1)
                                 .sendToTarget();
                     } catch (IOException e2) {
-                        //insert code to deal with this
+//                        toastMe("fail e2","short");
                         Toast.makeText(getBaseContext(), "Socket creation failed", Toast.LENGTH_SHORT).show();
                     }
                 }
                 if(fail == false) {
+                    toastMe("Create ConnectedThread","short");
                     mConnectedThread = new ControllerActivity.ConnectedThread(mBTSocket);
                     mConnectedThread.start();
 
@@ -406,7 +365,7 @@ public class ControllerActivity extends AppCompatActivity {
         return  device.createRfcommSocketToServiceRecord(BTMODULEUUID);
     }
 
-    private class ConnectedThread extends Thread implements Serializable {
+    private class ConnectedThread extends Thread {
         private final BluetoothSocket mmSocket;
         private final InputStream mmInStream;
         private final OutputStream mmOutStream;
